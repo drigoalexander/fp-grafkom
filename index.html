@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotation & Revolusion - FP Grafkom</title>
+</head>
+<body>
+    <script type="module" ">
+        import * as THREE from './build/three.module.js';
+        import { OrbitControls } from './js/OrbitControls.js';
+        
+        let controls;
+        let orbitRadius = 10;
+        let degree = 180;
+        let zoomFactor = 0.1;
+
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 1, 3000);
+  scene.add(camera);
+  camera.position.set(0,150,800);
+
+var renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+
+var sunLight = new THREE.AmbientLight( 0x888888 )
+scene.add( sunLight )
+
+
+var light = new THREE.DirectionalLight( 0xfdfcf0, 1 )
+light.position.set(0,100,11)
+scene.add( light )
+
+
+var sunLight = new THREE.DirectionalLight( 0xfffff, 1 )
+sunLight.position.set(0,100,-1000)
+scene.add(sunLight)
+
+const loader = new THREE.TextureLoader();
+const cloudTexture = loader.load("images/clouds_2.jpg");
+const earthNormal = loader.load("images/earth_texture_2.jpg")
+const earthMap = loader.load("images/earthmap1k.jpg")
+const earthAO = loader.load("images/earthspec1k.jpg")
+const earthDis = loader.load("images/earthbump1k.jpg")
+const starTexture = loader.load("images/galaxy_starfield.png")
+const moonTexture = loader.load("images/moon_texture.jpg")
+const sunTexture = loader.load("images/sun.jpg")
+const sunFlare = loader.load("images/R.jpg")
+const sunEmissive = loader.load("images/emissive.jpg")
+const earthSpec = loader.load("images/earthspec1k.jpg")
+const moonbump1k = loader.load("images/moonbump1k.jpg")
+
+var earthGeometry = new THREE.SphereGeometry( 50, 50, 50 );
+var earthMaterial = new THREE.MeshPhongMaterial({
+    map: earthMap,
+    normalMap: earthNormal,
+    
+  // specular: 0x333333,
+  // shininess: 25,
+  bumpMap: earthDis,
+  bumpScale: 0.5,
+  roughnessMap : earthAO,
+  roughness: 1,
+  specularMap: earthSpec,
+  specular: 0x111111
+
+
+});
+
+var earth = new THREE.Mesh(earthGeometry, earthMaterial);
+
+// scene.add(earth);
+earth.position.set(0,100,10)
+
+var cloudGeometry = new THREE.SphereGeometry(50,  50, 50);
+var cloudMaterial = new THREE.MeshPhongMaterial({
+  map: cloudTexture,
+  transparent: true,
+  opacity: 0.1
+});
+
+
+var clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+// scene.add(clouds);
+clouds.position.set(0,100,10)
+
+
+var starGeometry = new THREE.SphereGeometry(1500, 50, 50);
+var starMaterial = new THREE.MeshPhongMaterial({
+  map: starTexture,
+  side: THREE.DoubleSide,
+  shininess: 0
+});
+var starField = new THREE.Mesh(starGeometry, starMaterial);
+scene.add(starField);
+starField.position.set(0,100,0)
+
+var moonGeometry = new THREE.SphereGeometry(15, 50,50);
+var moonMaterial = new THREE.MeshPhongMaterial({
+  map: moonTexture,
+  bumpMap: moonbump1k,
+  bumpScale: 0.5
+});
+var moon = new THREE.Mesh(moonGeometry, moonMaterial);
+moon.position.set(135,100,-10);
+scene.add(moon);
+
+
+var sunGeometry = new THREE.SphereGeometry(400, 50,50);
+var sunMaterial = new THREE.MeshPhongMaterial({
+  map: sunTexture,
+  emissiveMap: sunEmissive,
+  emissiveIntensity: 1
+  
+});
+var sun = new THREE.Mesh(sunGeometry, sunMaterial);
+sun.position.set(0,100,-1000);
+scene.add(sun);
+
+var flare = new THREE.SphereGeometry(400,  50, 50);
+var flareMaterial = new THREE.MeshPhongMaterial({
+  map: sunFlare,
+
+  transparent: true,
+  opacity: 0.1
+});
+
+
+var flareSun = new THREE.Mesh(flare, flareMaterial);
+scene.add(flareSun);
+flareSun.position.set(0,100,-1000)
+
+
+    const orbit = new THREE.Group();
+    orbit.add(earth);
+    orbit.add(moon);
+
+    scene.add(orbit);
+
+    var r3 = 800;
+var r4 = -1400;
+
+var r2 = 120;
+var r = 0;
+var theta = 0;
+var dTheta = 2 * Math.PI / 1000;
+
+controls = new OrbitControls( camera, renderer.domElement );
+var render = function (actions) {
+    earth.rotation.y += .0125;
+    clouds.rotation.y += .0125;
+    earth.rotation.x += .000125;
+    clouds.rotation.x += .000125;
+    moon.rotation.y -= 0.0125;
+    moon.rotation.x -= 0.000125;
+    sun.rotation.y += 0.0125;
+    
+    flareSun.rotation.y += 0.0125;
+    
+
+    theta += dTheta;
+ 
+  moon.position.x = r2 * Math.cos(theta);
+  moon.position.z = r * Math.sin(theta);
+
+  orbit.position.x = r3 * Math.cos(theta);
+  orbit.position.z = r4 * Math.sin(theta);
+renderer.render(scene, camera);
+requestAnimationFrame(render);
+};
+render();
+    </script>
+</body>
+</html>
